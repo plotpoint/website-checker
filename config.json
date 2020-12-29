@@ -1,0 +1,15 @@
+ {
+   "websites": [{
+     "url": "https://DOMAIN.com",
+     "hash": "empty"
+   }],
+   "config": {
+     "email": {
+       "smtp_server": "YOUR.MAIL.com",
+       "port": 587,
+       "sender_email": "SENDER_EMAIL@YOURMAIL.com",
+       "password": "Pa$$word",
+       "receiver_email": "YOUR_EMAIL@ADDRESS.com"
+     }
+   }
+ }
