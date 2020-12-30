@@ -32,3 +32,7 @@ The current configuration is stored in a json file. It is located in the same pa
 ```
 > python website-checker.py
 ```
+
+### docker
+docker build -t website-checker .
+docker run website-checker

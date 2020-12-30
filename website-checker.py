@@ -1,10 +1,14 @@
 import requests
 import hashlib
 import json
+import schedule
+import time
 
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+print('Script starts...')
 
 # load data from config.json:
 # {
@@ -31,6 +35,7 @@ def get_hash(url):
     if not url:
         print("No URL specified!")
         return
+    print('GET request: ' + url)
     # send GET request    
     page = requests.get(url)
 
@@ -39,6 +44,7 @@ def get_hash(url):
 
 # build and send email
 def send_mail(text):
+    print('build message...')
     # get email config 
     config = data["config"]["email"]
 
@@ -74,34 +80,42 @@ def send_mail(text):
     finally:
         server.quit() 
 
+def job():
+    # check all websites and build email html body
+    print('build email body...')
+    body = "<html><body><p>An overview of the reviewed websites:</p><hr>"
 
-# check all websites and build email html body
-body = "<html><body><p>An overview of the reviewed websites:</p><hr>"
+    # check all registered websites
+    for website in data["websites"]:
+        url = website["url"]
+        hash = website["hash"]
 
-# check all registered websites
-for website in data["websites"]:
-    url = website["url"]
-    hash = website["hash"]
+        #get current hash
+        current_hash = get_hash(url)
 
-    #get current hash
-    current_hash = get_hash(url)
+        # check if the hash has changed 
+        if not hash or hash != current_hash:
+            msg = "<p style='color:red'>Website <a href='" + url +"'>" + url + "</a> has changed!</p>"
 
-    # check if the hash has changed 
-    if not hash or hash != current_hash:
-        msg = "<p style='color:red'>Website <a href='" + url +"'>" + url + "</a> has changed!</p>"
+            # set new hash
+            website["hash"] = current_hash
+        else:
+            msg = "<p style='color:green'>Website <a href='" + url +"'>" + url + "</a> has not changed!</p>" 
 
-        # set new hash
-        website["hash"] = current_hash
-    else:
-        msg = "<p style='color:green'>Website <a href='" + url +"'>" + url + "</a> has not changed!</p>" 
+        # add to email body
+        body +=  msg
 
-    # add to email body
-    body +=  msg
+    # close all tags and send mail
+    body += "</body></html>"
+    send_mail(body)
 
-# close all tags and send mail
-body += "</body></html>"
-send_mail(body)
+    # save json data
+    with open('config.json', 'w') as new_json_file:
+        json.dump(data,new_json_file, indent=2)
+        print('config.json saved!')
 
-# save json data
-with open('config.json', 'w') as new_json_file:
-    json.dump(data,new_json_file, indent=2)
+# strart scheduler
+schedule.every().day.at("17:00").do(job)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
