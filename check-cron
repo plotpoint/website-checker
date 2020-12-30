@@ -1,2 +1,0 @@
-* * * * * echo "test" >> /var/log/cron.log 2>&1
-* * * * * python /app/website-checker.py >> /var/log/cron.log 2>&1

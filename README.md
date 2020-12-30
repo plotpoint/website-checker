@@ -34,5 +34,7 @@ The current configuration is stored in a json file. It is located in the same pa
 ```
 
 ### docker
-docker build -t website-checker .
-docker run website-checker
+```
+docker build --rm -t website-checker .
+docker run -d website-checker
+```
