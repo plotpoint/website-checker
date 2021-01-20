@@ -1,0 +1,8 @@
+version: "2"
+
+services:
+  site_checker:
+    build: .
+    volumes:
+      - .:/opt/docker/volumes/website_checker
+    restart: always

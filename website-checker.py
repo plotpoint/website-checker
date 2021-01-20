@@ -81,8 +81,10 @@ def send_mail(text):
         server.quit() 
 
 def job():
+    print('start job...')
+    website_changed = False
+
     # check all websites and build email html body
-    print('build email body...')
     body = "<html><body><p>An overview of the reviewed websites:</p><hr>"
 
     # check all registered websites
@@ -95,6 +97,7 @@ def job():
 
         # check if the hash has changed 
         if not hash or hash != current_hash:
+            website_changed = True
             msg = "<p style='color:red'>Website <a href='" + url +"'>" + url + "</a> has changed!</p>"
 
             # set new hash
@@ -107,15 +110,22 @@ def job():
 
     # close all tags and send mail
     body += "</body></html>"
-    send_mail(body)
+
+    # send only email, if somethingg changed
+    if(website_changed):
+        send_mail(body)
+    else:
+        print("nothing changed!")
 
     # save json data
     with open('config.json', 'w') as new_json_file:
         json.dump(data,new_json_file, indent=2)
         print('config.json saved!')
+    
+    print("job done!")
 
-# strart scheduler
-schedule.every().day.at("17:00").do(job)
+# strat scheduler
+schedule.every(1).minutes.do(job)
 while True:
     schedule.run_pending()
     time.sleep(1)
